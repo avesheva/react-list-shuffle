@@ -1,0 +1,43 @@
+{
+  "name": "your-lib-name",
+  "version": "1.0.0",
+  "description": "Your lib description",
+  "homepage": "https://github.com/avesheva/vue3-ts-lib-starter",
+  "author": "Your Name <yourmail@gmail.com>",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "javascript",
+    "typescript"
+  ],
+  "private": false,
+  "main": "dist/your-lib-name.umd.js",
+  "module": "dist/your-lib-name.es.js",
+  "exports": {
+    "import": "./dist/your-lib-name.es.js",
+    "require": "./dist/your-lib-name.umd.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "types": "./dist/fileWithTypes.d.ts",
+
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react": "^3.0.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.0"
+  }
+}
