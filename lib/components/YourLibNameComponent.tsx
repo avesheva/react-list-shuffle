@@ -1,13 +1,9 @@
 import React, { FC } from 'react'
 
-export interface IYourLibComponentProps {
-
-}
-
-const YourLibNameComponent: FC<IYourLibComponentProps> = (props: IYourLibComponentProps) => {
+const YourLibNameComponent: FC = () => {
   return (
     <div>
-      <h4>Your lib components here : "./lib"</h4>
+      <h4>Your lib components here s : "./lib"</h4>
     </div>
   )
 }
