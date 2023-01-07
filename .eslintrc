@@ -23,5 +23,11 @@
     "plugin:react/recommended",
     "plugin:@typescript-eslint/recommended",
     "airbnb-typescript"
-  ]
+  ],
+  "overrides": [{
+    "files": [ "tests/*" ],
+    "rules": {
+      "react/react-in-jsx-scope": 0
+    }
+  }]
 }

@@ -7,7 +7,7 @@
     "lib/**/*.ts",
     "lib/**/*.d.ts",
     "lib/**/*.tsx",
-    "tests/*.spec.ts",
-    "tests/*.test.ts"
+    "tests/*.spec.tsx",
+    "tests/*.test.tsx"
   ],
 }

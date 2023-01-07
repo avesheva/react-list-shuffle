@@ -3,7 +3,7 @@ import React, { FC } from 'react'
 const YourLibNameComponent: FC = () => {
   return (
     <div>
-      <h4>Your lib components here s : "./lib"</h4>
+      <h4>Your lib components here : "./lib"</h4>
     </div>
   )
 }
