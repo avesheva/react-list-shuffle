@@ -1,3 +1,3 @@
-import YourLibNameComponent from './components/YourLibNameComponent'
+import ListShuffle from './components/ListShuffle'
 
-export default YourLibNameComponent
+export default ListShuffle

@@ -6,8 +6,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'lib/index.tsx'),
-      name: 'your-lib-name',
-      fileName: format => `your-lib-name.${ format }.js`,
+      name: 'react-list-shuffle',
+      fileName: format => `react-list-shuffle.${ format }.js`,
     },
     rollupOptions: {
       external: ['React'],
