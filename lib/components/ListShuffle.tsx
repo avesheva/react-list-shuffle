@@ -4,12 +4,14 @@ export interface IProps {
   id?: string,
   duration?: number,
   shuffleOnInit?: boolean,
-  shuffle: number | string | boolean,
+  restoreOrder?: number | string | boolean,
+  shuffle?: number | string | boolean,
   children: ReactNode
 }
 
 export type ListItemDataType = { index: number, top: number }
 
+const initHash = 'KoypS3Gk0Cw8VS'
 let mounted = false
 
 const ListShuffle: FC<IProps> = ({
@@ -17,10 +19,13 @@ const ListShuffle: FC<IProps> = ({
   id = 'listWrapper',
   duration = 1,
   shuffleOnInit = false,
-  shuffle,
+  shuffle = initHash,
+  restoreOrder = initHash,
 }) => {
   const listWrapper = useRef<HTMLDivElement | null>(null)
-  const arr = useRef<ListItemDataType[]>([])
+  const initialOrder = useRef<ListItemDataType[]>([])
+  const lastShuffleValue = useRef<string | number | boolean>(shuffle)
+  const lastRestoreOrderValue = useRef<string | number | boolean>(restoreOrder)
 
   const shuffleArray = (array: ListItemDataType[]) => {
     const arrClone = [...array]
@@ -33,19 +38,34 @@ const ListShuffle: FC<IProps> = ({
     return arrClone
   }
 
-  const shuffleList = () => {
+  const shuffleList = (toInitOrder = false) => {
     if (!listWrapper.current) return
 
-    const newOrder = shuffleArray(arr.current)
+    const newOrder = toInitOrder ? [ ...initialOrder.current ] : shuffleArray(initialOrder.current)
 
     for (let i = 0; i < listWrapper.current.children.length; i++) {
       const currentElement = listWrapper.current.children[i] as HTMLElement
       const newIndex = newOrder.findIndex((item  ) => item.index === i)
-      const top = arr.current[newIndex].top - arr.current[i].top
+      const top = initialOrder.current[newIndex].top - initialOrder.current[i].top
 
       currentElement.style.transform = `translate(0, ${ top }px)`
     }
   }
+
+  useEffect(() => {
+    if (shuffleOnInit || shuffle !== lastShuffleValue.current) {
+      shuffleList()
+      lastShuffleValue.current = shuffle
+    }
+  }, [shuffle])
+
+  useEffect(() => {
+    if (restoreOrder !== lastRestoreOrderValue.current) {
+      shuffleList(true)
+      lastRestoreOrderValue.current = restoreOrder
+    }
+  }, [restoreOrder])
+
 
   useEffect(() => {
     listWrapper.current = document.getElementById(id) as HTMLDivElement
@@ -54,22 +74,15 @@ const ListShuffle: FC<IProps> = ({
       for (let i = 0; i < listWrapper.current.children.length; i++) {
         const element = listWrapper.current.children[i] as HTMLElement
 
-        element.setAttribute('ps', `${ i }`)
         element.style.transitionProperty = 'transform'
         element.style.transitionDuration = `${ duration }s`
 
-        arr.current.push({ index: i, top: element.getBoundingClientRect().top })
+        initialOrder.current.push({ index: i, top: element.getBoundingClientRect().top })
       }
 
       mounted = true
     }
   }, [])
-
-  useEffect(() => {
-    if (shuffleOnInit || shuffle !== 1) {
-      shuffleList()
-    }
-  }, [shuffle])
 
   return (
     <div id={ id }>
