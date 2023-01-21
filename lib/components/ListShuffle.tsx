@@ -11,7 +11,6 @@ export interface IProps {
 
 export type ListItemDataType = { index: number, top: number }
 
-const initHash = 'KoypS3Gk0Cw8VS'
 let mounted = false
 
 const ListShuffle: FC<IProps> = ({
@@ -19,8 +18,8 @@ const ListShuffle: FC<IProps> = ({
   id = 'listWrapper',
   duration = 1,
   shuffleOnInit = false,
-  shuffle = initHash,
-  restoreOrder = initHash,
+  shuffle = Date.now(),
+  restoreOrder = Date.now(),
 }) => {
   const listWrapper = useRef<HTMLDivElement | null>(null)
   const initialOrder = useRef<ListItemDataType[]>([])
