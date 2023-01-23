@@ -9,7 +9,7 @@ export interface IProps {
   children: ReactNode
 }
 
-export type ListItemDataType = { index: number, top: number }
+export type ListItemDataType = { index: number, top: number, bottom: number, height: number }
 
 let mounted = false
 
@@ -41,11 +41,25 @@ const ListShuffle: FC<IProps> = ({
     if (!listWrapper.current) return
 
     const newOrder = toInitOrder ? [ ...initialOrder.current ] : shuffleArray(initialOrder.current)
+    const updatedCoordinates: ListItemDataType[] = []
 
-    for (let i = 0; i < listWrapper.current.children.length; i++) {
-      const currentElement = listWrapper.current.children[i] as HTMLElement
-      const newIndex = newOrder.findIndex((item  ) => item.index === i)
-      const top = initialOrder.current[newIndex].top - initialOrder.current[i].top
+    for (let i = 0; i < newOrder.length; i++) {
+      updatedCoordinates[i] = { ...newOrder[i] }
+
+      if (i === 0) {
+        updatedCoordinates[i].top = initialOrder.current[i].top
+        updatedCoordinates[i].bottom = updatedCoordinates[i].top + updatedCoordinates[i].height
+        continue
+      }
+
+      updatedCoordinates[i].top = updatedCoordinates[i - 1].bottom
+      updatedCoordinates[i].bottom = updatedCoordinates[i].top + updatedCoordinates[i].height
+    }
+
+    for (let i = 0; i < updatedCoordinates.length; i++) {
+      const item = updatedCoordinates[i]
+      const currentElement = listWrapper.current.children[item.index] as HTMLElement
+      const top = item.top - initialOrder.current[item.index].top
 
       currentElement.style.transform = `translate(0, ${ top }px)`
     }
@@ -72,11 +86,14 @@ const ListShuffle: FC<IProps> = ({
     if (!mounted && listWrapper) {
       for (let i = 0; i < listWrapper.current.children.length; i++) {
         const element = listWrapper.current.children[i] as HTMLElement
+        const clientRect = element.getBoundingClientRect()
 
         element.style.transitionProperty = 'transform'
         element.style.transitionDuration = `${ duration }s`
 
-        initialOrder.current.push({ index: i, top: element.getBoundingClientRect().top })
+        initialOrder.current.push(
+          { index: i, top: clientRect.top, bottom: clientRect.bottom, height: clientRect.height },
+        )
       }
 
       mounted = true
