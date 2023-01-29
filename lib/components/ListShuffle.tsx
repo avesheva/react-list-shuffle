@@ -23,6 +23,7 @@ const ListShuffle: FC<IProps> = ({
 }) => {
   const listWrapper = useRef<HTMLDivElement | null>(null)
   const initialOrder = useRef<ListItemDataType[]>([])
+  const newOrder = useRef<ListItemDataType[]>([])
   const lastShuffleValue = useRef<string | number | boolean>(shuffle)
   const lastRestoreOrderValue = useRef<string | number | boolean>(restoreOrder)
 
@@ -37,14 +38,11 @@ const ListShuffle: FC<IProps> = ({
     return arrClone
   }
 
-  const shuffleList = (toInitOrder = false) => {
-    if (!listWrapper.current) return
-
-    const newOrder = toInitOrder ? [ ...initialOrder.current ] : shuffleArray(initialOrder.current)
+  const positionCalculate = (list: ListItemDataType[]): ListItemDataType[] => {
     const updatedCoordinates: ListItemDataType[] = []
 
-    for (let i = 0; i < newOrder.length; i++) {
-      updatedCoordinates[i] = { ...newOrder[i] }
+    for (let i = 0; i < list.length; i++) {
+      updatedCoordinates[i] = { ...list[i] }
 
       if (i === 0) {
         updatedCoordinates[i].top = initialOrder.current[i].top
@@ -56,12 +54,50 @@ const ListShuffle: FC<IProps> = ({
       updatedCoordinates[i].bottom = updatedCoordinates[i].top + updatedCoordinates[i].height
     }
 
+    return updatedCoordinates
+  }
+
+  const moveItems = (list: ListItemDataType[], wrapper: HTMLElement) => {
+    const updatedCoordinates = positionCalculate(list)
+
     for (let i = 0; i < updatedCoordinates.length; i++) {
       const item = updatedCoordinates[i]
-      const currentElement = listWrapper.current.children[item.index] as HTMLElement
-      const top = item.top - initialOrder.current[item.index].top
+      const currentElement = wrapper.children[item.index] as HTMLElement
 
-      currentElement.style.transform = `translate(0, ${ top }px)`
+      if (initialOrder.current[item.index]) {
+        const top = item.top - initialOrder.current[item.index].top
+        currentElement.style.transform = `translate(0, ${ top }px)`
+      }
+    }
+  }
+
+  const shuffleList = (toInitOrder = false) => {
+    if (!listWrapper.current) return
+
+    newOrder.current = toInitOrder ? [ ...initialOrder.current ] : shuffleArray(initialOrder.current)
+    moveItems(newOrder.current, listWrapper.current)
+  }
+
+  const initialComputing = () => {
+    if (!listWrapper.current) return
+
+    initialOrder.current = []
+
+    for (let i = 0; i < listWrapper.current.children.length; i++) {
+      const element = listWrapper.current.children[i] as HTMLElement
+
+      element.style.transitionProperty = 'transform'
+      element.style.transitionDuration = `${ duration }s`
+      element.setAttribute('index', `${ i }`)
+
+      initialOrder.current.push(
+        {
+          index: i,
+          top: element.offsetTop,
+          bottom: element.offsetTop + element.offsetHeight,
+          height: element.offsetHeight,
+        },
+      )
     }
   }
 
@@ -81,19 +117,53 @@ const ListShuffle: FC<IProps> = ({
 
 
   useEffect(() => {
-    listWrapper.current = document.getElementById(id) as HTMLDivElement
+    if (!mounted) {
+      listWrapper.current = document.getElementById(id) as HTMLDivElement
 
-    if (!mounted && listWrapper) {
-      for (let i = 0; i < listWrapper.current.children.length; i++) {
-        const element = listWrapper.current.children[i] as HTMLElement
-        const clientRect = element.getBoundingClientRect()
+      let observerInited = false
 
-        element.style.transitionProperty = 'transform'
-        element.style.transitionDuration = `${ duration }s`
+      initialComputing()
 
-        initialOrder.current.push(
-          { index: i, top: clientRect.top, bottom: clientRect.bottom, height: clientRect.height },
-        )
+      /* List item deleting handling */
+      const mutationObserver = new MutationObserver((mutationsList: MutationRecord[]) => {
+        mutationsList.forEach((mutation: MutationRecord) => {
+          mutation.removedNodes.forEach((node: Node) => {
+            const removedItemIndex = (node as HTMLElement).getAttribute('index')
+            let indexInOrder: number | null = null
+
+            if (removedItemIndex !== null) {
+              newOrder.current = newOrder.current.map((item, i) => {
+                if (Number(removedItemIndex) === item.index) indexInOrder = i
+                if (Number(removedItemIndex) < item.index) item.index--
+
+                return item
+              })
+              indexInOrder !== null && newOrder.current.splice(indexInOrder, 1)
+
+              if (listWrapper.current) {
+                initialComputing()
+                moveItems(newOrder.current, listWrapper.current)
+              }
+            }
+          })
+        })
+      })
+
+      if (listWrapper.current) {
+        mutationObserver.observe(listWrapper.current, { subtree: false, childList: true })
+      }
+
+      /* List size changing handling */
+      const observer = new ResizeObserver(() => {
+        if (mounted && observerInited) {
+          initialComputing()
+        }
+
+        observerInited = true
+      })
+
+      if (listWrapper.current) {
+        observer.observe(listWrapper.current)
       }
 
       mounted = true
