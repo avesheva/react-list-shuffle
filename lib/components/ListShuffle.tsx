@@ -120,13 +120,15 @@ const ListShuffle: FC<IProps> = ({
     if (!mounted) {
       listWrapper.current = document.getElementById(id) as HTMLDivElement
 
-      let observerInited = false
-
       initialComputing()
 
-      /* List item deleting handling */
+      /* List items adding/deleting handling */
       const mutationObserver = new MutationObserver((mutationsList: MutationRecord[]) => {
         mutationsList.forEach((mutation: MutationRecord) => {
+          if (mutation.addedNodes.length > 0) {
+            initialComputing()
+          }
+
           mutation.removedNodes.forEach((node: Node) => {
             const removedItemIndex = (node as HTMLElement).getAttribute('index')
             let indexInOrder: number | null = null
@@ -151,19 +153,6 @@ const ListShuffle: FC<IProps> = ({
 
       if (listWrapper.current) {
         mutationObserver.observe(listWrapper.current, { subtree: false, childList: true })
-      }
-
-      /* List size changing handling */
-      const observer = new ResizeObserver(() => {
-        if (mounted && observerInited) {
-          initialComputing()
-        }
-
-        observerInited = true
-      })
-
-      if (listWrapper.current) {
-        observer.observe(listWrapper.current)
       }
 
       mounted = true
