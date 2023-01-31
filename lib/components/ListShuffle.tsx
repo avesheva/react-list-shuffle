@@ -6,6 +6,7 @@ export interface IProps {
   shuffleOnInit?: boolean,
   restoreOrder?: number | string | boolean,
   shuffle?: number | string | boolean,
+  shuffledHandler?: (args: number[]) => any,
   children: ReactNode
 }
 
@@ -20,6 +21,7 @@ const ListShuffle: FC<IProps> = ({
   shuffleOnInit = false,
   shuffle = Date.now(),
   restoreOrder = Date.now(),
+  shuffledHandler,
 }) => {
   const mutationObserver = useRef<MutationObserver>()
   const listWrapper = useRef<HTMLDivElement | null>(null)
@@ -34,6 +36,12 @@ const ListShuffle: FC<IProps> = ({
     for (let i = arrClone.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       const t = arrClone[i]; arrClone[i] = arrClone[j]; arrClone[j] = t
+    }
+
+    if (shuffledHandler && typeof shuffledHandler === 'function') {
+      setTimeout(() => {
+        shuffledHandler(arrClone.map((item) => item.index))
+      }, duration * 1000)
     }
 
     return arrClone
