@@ -21,6 +21,7 @@ const ListShuffle: FC<IProps> = ({
   shuffle = Date.now(),
   restoreOrder = Date.now(),
 }) => {
+  const mutationObserver = useRef<MutationObserver>()
   const listWrapper = useRef<HTMLDivElement | null>(null)
   const initialOrder = useRef<ListItemDataType[]>([])
   const newOrder = useRef<ListItemDataType[]>([])
@@ -123,7 +124,7 @@ const ListShuffle: FC<IProps> = ({
       initialComputing()
 
       /* List items adding/deleting handling */
-      const mutationObserver = new MutationObserver((mutationsList: MutationRecord[]) => {
+      mutationObserver.current = new MutationObserver((mutationsList: MutationRecord[]) => {
         mutationsList.forEach((mutation: MutationRecord) => {
           if (mutation.addedNodes.length > 0) {
             initialComputing()
@@ -133,7 +134,7 @@ const ListShuffle: FC<IProps> = ({
             const removedItemIndex = (node as HTMLElement).getAttribute('index')
             let indexInOrder: number | null = null
 
-            if (removedItemIndex !== null) {
+            if (removedItemIndex !== '') {
               newOrder.current = newOrder.current.map((item, i) => {
                 if (Number(removedItemIndex) === item.index) indexInOrder = i
                 if (Number(removedItemIndex) < item.index) item.index--
@@ -152,10 +153,18 @@ const ListShuffle: FC<IProps> = ({
       })
 
       if (listWrapper.current) {
-        mutationObserver.observe(listWrapper.current, { subtree: false, childList: true })
+        mutationObserver.current.observe(listWrapper.current, { subtree: false, childList: true })
       }
 
       mounted = true
+    }
+
+    return () => {
+      if (mounted) {
+        mounted = false
+        newOrder.current = []
+        mutationObserver.current?.disconnect()
+      }
     }
   }, [])
 
