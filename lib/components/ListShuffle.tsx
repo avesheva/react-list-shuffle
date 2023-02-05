@@ -13,6 +13,7 @@ export interface IProps {
 export type ListItemDataType = { index: number, top: number, bottom: number, height: number }
 
 let mounted = false
+let timerId: ReturnType<typeof setTimeout>
 
 const ListShuffle: FC<IProps> = ({
   children,
@@ -39,7 +40,9 @@ const ListShuffle: FC<IProps> = ({
     }
 
     if (shuffledHandler && typeof shuffledHandler === 'function') {
-      setTimeout(() => {
+      clearTimeout(timerId)
+
+      timerId = setTimeout(() => {
         shuffledHandler(arrClone.map((item) => item.index))
       }, duration * 1000)
     }
