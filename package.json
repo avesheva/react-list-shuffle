@@ -1,6 +1,6 @@
 {
   "name": "react-list-shuffle",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Component for animated shuffling and change order in lists",
   "homepage": "https://github.com/avesheva/react-list-shuffle",
   "author": "Andrii Shevchenko <shevchenkoandrii.dev@gmail.com>",
