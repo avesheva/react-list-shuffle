@@ -4,6 +4,7 @@ Lightweight, easy to use component for animated shuffling and change order in li
 
 [React list shuffle.webm](https://user-images.githubusercontent.com/12416010/213731815-287dee79-1242-4c40-afe9-a52ada72cef2.webm)
 
+## Demo
 [**Live Demo**](https://avesheva.github.io/react-list-shuffle/)
 
 ## Installation
